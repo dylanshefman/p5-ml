@@ -33,7 +33,16 @@ private:
 
   // A custom comparator
   class PairComp {
+  public:
+    bool operator()(const Pair_type &p1, const Pair_type &p2) const {
+      return key_compare()(p1.first, p2.first);
+    }
+
+  private:
+    Key_compare key_compare;
   };
+
+  BinarySearchTree<Pair_type, PairComp> bst;
 
 public:
 
@@ -62,11 +71,15 @@ public:
 
 
   // EFFECTS : Returns whether this Map is empty.
-  bool empty() const;
+  bool empty() const {
+    return bst.empty();
+  }
 
   // EFFECTS : Returns the number of elements in this Map.
   // NOTE : size_t is an integral type from the STL
-  size_t size() const;
+  size_t size() const {
+    return bst.size();
+  }
 
   // EFFECTS : Searches this Map for an element with a key equivalent
   //           to k and returns an Iterator to the associated value if found,
@@ -75,7 +88,11 @@ public:
   // HINT: Since Map is implemented using a BinarySearchTree that stores
   //       (key, value) pairs, you'll need to construct a dummy value
   //       using "Value_type()".
-  Iterator find(const Key_type& k) const;
+  Iterator find(const Key_type& k) const {
+    Iterator i = bst.find(Pair_type(k, Value_type()));
+    if (i == nullptr) return bst.end();
+    else return i;
+  }
 
   // MODIFIES: this
   // EFFECTS : Returns a reference to the mapped value for the given
@@ -93,7 +110,17 @@ public:
   //           that element. This ensures the proper value-initialization is done.
   //
   // HINT: http://www.cplusplus.com/reference/map/map/operator[]/
-  Value_type& operator[](const Key_type& k);
+  
+  Value_type& operator[](const Key_type& k) {
+    Iterator i = find(k);
+    if (i != bst.end()) return (*i).second;
+    else {
+      Pair_type new_pair = {k, Value_type()};
+      i = bst.insert(new_pair);
+      return (*i).second;
+    }
+  }
+
 
   // MODIFIES: this
   // EFFECTS : Inserts the given element into this Map if the given key
@@ -110,9 +137,6 @@ public:
 
   // EFFECTS : Returns an iterator to "past-the-end".
   Iterator end() const;
-
-private:
-  // Add a BinarySearchTree private member HERE.
 };
 
 // You may implement member functions below using an "out-of-line" definition
